@@ -19,12 +19,12 @@ class ObjectPermissionQuerySet(QuerySet):
 
 
 class ObjectPermission(models.Model):
-    base_object_ct = models.ForeignKey(ContentType)
+    base_object_ct = models.ForeignKey(ContentType, related_name="+")
     base_object_id = models.PositiveIntegerField()
 
     base_object = generic.GenericForeignKey("base_object_ct", "base_object_id")
 
-    target_object_ct = models.ForeignKey(ContentType)
+    target_object_ct = models.ForeignKey(ContentType, related_name="+")
     target_object_id = models.PositiveIntegerField()
 
     target_object = generic.GenericForeignKey("target_object_ct", "target_object_id")
