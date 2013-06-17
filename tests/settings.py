@@ -37,3 +37,9 @@ DATABASES = {
         "NAME": "olp.db",
     }
 }
+
+OLP_SETTINGS = {
+    "models": (
+        ("django.contrib.auth.models.Group", "users"),
+    )
+}
