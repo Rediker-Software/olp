@@ -3,7 +3,7 @@ from olp.backends import PermissionBackend
 from ..models import Apple
 
 
-class TestBackend(TestCase):
+class TestBackendBasic(TestCase):
 
     def setUp(self):
         from django.contrib.auth.models import User
@@ -33,5 +33,18 @@ class TestBackend(TestCase):
         apple.save()
 
         result = self.backend.get_all_permissions(self.user, apple)
+
+        self.assertEqual(result, set())
+
+    def test_user_no_group_permissions(self):
+        result = self.backend.get_group_permissions(self.user)
+
+        self.assertEqual(result, set())
+
+    def test_user_no_obj_group_permissions(self):
+        apple = Apple(name="test")
+        apple.save()
+
+        result = self.backend.get_group_permissions(self.user, apple)
 
         self.assertEqual(result, set())
