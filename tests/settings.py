@@ -11,6 +11,11 @@ TEMPLATE_DEBUG = True
 
 ROOT_URLCONF = "tests.urls"
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    "olp.backends.PermissionBackend",
+)
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
