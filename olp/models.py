@@ -1,0 +1,34 @@
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes import generic
+from django.db import models
+from django.db.models.query import QuerySet
+
+
+class ObjectPermissionManager(models.Manager):
+
+    def __getattr__(self, name):
+        return getattr(self.get_query_set(), name)
+
+    def get_query_set(self):
+        return ObjectPermissionQuerySet(self.model)
+
+
+class ObjectPermissionQuerySet(QuerySet):
+    pass
+
+
+class ObjectPermission(models.Model):
+    base_object_ct = models.ForeignKey(ContentType)
+    base_object_id = models.PositiveIntegerField()
+
+    base_object = generic.GenericForeignKey("base_object_ct", "base_object_id")
+
+    target_object_ct = models.ForeignKey(ContentType)
+    target_object_id = models.PositiveIntegerField()
+
+    target_object = generic.GenericForeignKey("target_object_ct", "target_object_id")
+
+    permission = models.ForeignKey(Permission)
+
+    objects = ObjectPermissionManager()
