@@ -44,7 +44,12 @@ class PermissionBackend(object):
 
             model_objs = model.objects.filter(**{filter_path: user})
 
-            objs = objs | ObjectPermission.objects.for_base_id(model_objs).for_base_model(model)
+            objs_query = ObjectPermission.objects.for_base_id(model_objs).for_base_model(model)
+
+            if obj is not None:
+                objs_query = objs_query.for_target(obj)
+
+            objs = objs | objs_query
 
         perms_list = objs.select_related("permission__content_type", "permission")\
             .values_list("permission__content_type__app_label", "permission__codename")
