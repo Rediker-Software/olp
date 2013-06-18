@@ -15,7 +15,19 @@ class ObjectPermissionManager(models.Manager):
 
 
 class ObjectPermissionQuerySet(QuerySet):
-    pass
+
+    def for_base(self, obj):
+        ct = ContentType.objects.get_for_model(obj)
+
+        return self.filter(base_object_ct=ct, base_object_id=obj.id)
+
+    def for_permission(self, permission):
+        return self.filter(permission=permission)
+
+    def for_target(self, obj):
+        ct = ContentType.objects.get_for_model(obj)
+
+        return self.filter(target_object_ct=ct, target_object_id=obj.id)
 
 
 class ObjectPermission(models.Model):

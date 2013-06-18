@@ -3,7 +3,6 @@ def assign_perm(user, permission, obj=None):
     Assign a permission to a user
     """
 
-    from django.contrib.contenttypes.models import ContentType
     from olp.models import ObjectPermission
 
     # Check if the given permission is a Permission object
@@ -29,6 +28,8 @@ def remove_perm(user, permission, obj=None):
     Remove a permission from a user
     """
 
+    from olp.models import ObjectPermission
+
     if not hasattr(permission, "pk"):
         permission = _get_perm_for_codename(permission)
 
@@ -36,7 +37,10 @@ def remove_perm(user, permission, obj=None):
             return False
 
     if obj:
-        pass
+        permission = ObjectPermission.objects.for_base(user).for_target(obj).for_permission(permission)
+
+        if permission.count():
+            permission.delete()
     else:
         user.user_permissions.remove(permission)
 

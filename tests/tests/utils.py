@@ -50,7 +50,7 @@ class TestAssignPerm(TestCase):
         self.assertEqual(ObjectPermission.objects.count(), 0)
 
 
-class TestRemovePerm(TestCase):
+class TestRemovePermNotSet(TestCase):
 
     def setUp(self):
         from django.contrib.auth.models import User
@@ -72,5 +72,14 @@ class TestRemovePerm(TestCase):
         permission = Permission.objects.all()[0]
 
         result = self.user.remove_perm(permission)
+
+        self.assertEqual(result, True)
+
+    def test_real_obj_permission(self):
+        apple = Apple(name="test")
+        apple.save()
+
+        with self.assertNumQueries(2):
+            result = self.user.remove_perm("test.can_be_awesome", apple)
 
         self.assertEqual(result, True)
