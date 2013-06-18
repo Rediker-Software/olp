@@ -48,3 +48,7 @@ class TestAssignPerm(TestCase):
 
         self.assertEqual(result, False)
         self.assertEqual(ObjectPermission.objects.count(), 0)
+
+
+class TestRemovePerm(TestCase):
+    pass
