@@ -33,7 +33,7 @@ class TestAssignPerm(TestCase):
         apple = Apple(name="test")
         apple.save()
 
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(2):
             result = self.user.assign_perm("test.can_be_awesome", apple)
 
         self.assertEqual(result, True)
@@ -48,6 +48,18 @@ class TestAssignPerm(TestCase):
 
         self.assertEqual(result, False)
         self.assertEqual(ObjectPermission.objects.count(), 0)
+
+    def test_obj_permission_instance(self):
+        permission = Permission.objects.all()[0]
+
+        apple = Apple(name="test")
+        apple.save()
+
+        with self.assertNumQueries(3):
+            result = self.user.assign_perm(permission, apple)
+
+        self.assertEqual(result, True)
+        self.assertEqual(ObjectPermission.objects.count(), 1)
 
 
 class TestRemovePerm(TestCase):
@@ -84,7 +96,21 @@ class TestRemovePerm(TestCase):
             result = self.user.remove_perm("test.can_be_awesome", apple)
 
         self.assertEqual(result, True)
+        self.assertEqual(ObjectPermission.objects.count(), 0)
 
+    def test_obj_permission_instance(self):
+        permission = Permission.objects.all()[0]
+
+        apple = Apple(name="test")
+        apple.save()
+
+        self.user.assign_perm(permission, apple)
+
+        with self.assertNumQueries(2):
+            result = self.user.remove_perm(permission, apple)
+
+        self.assertEqual(result, True)
+        self.assertEqual(ObjectPermission.objects.count(), 0)
 
 class TestRemovePermNotSet(TestCase):
 
@@ -128,3 +154,14 @@ class TestRemovePermNotSet(TestCase):
             result = self.user.remove_perm("test.does_not_exist", apple)
 
         self.assertEqual(result, False)
+
+    def test_obj_permission_instance(self):
+        permission = Permission.objects.all()[0]
+
+        apple = Apple(name="test")
+        apple.save()
+
+        with self.assertNumQueries(1):
+            result = self.user.remove_perm(permission, apple)
+
+        self.assertEqual(result, True)
