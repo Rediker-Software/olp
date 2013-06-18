@@ -51,4 +51,26 @@ class TestAssignPerm(TestCase):
 
 
 class TestRemovePerm(TestCase):
-    pass
+
+    def setUp(self):
+        from django.contrib.auth.models import User
+
+        self.user = User.objects.create_user("test", "test@test.com", "test")
+        self.user.save()
+
+    def test_real_normal_permission(self):
+        result = self.user.remove_perm("test.can_be_awesome")
+
+        self.assertEquals(result, True)
+
+    def test_fake_normal_permission(self):
+        result = self.user.remove_perm("test.does_not_exist")
+
+        self.assertEqual(result, False)
+
+    def test_normal_permission_instance(self):
+        permission = Permission.objects.all()[0]
+
+        result = self.user.remove_perm(permission)
+
+        self.assertEqual(result, True)

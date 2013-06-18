@@ -25,13 +25,29 @@ def assign_perm(user, permission, obj=None):
 
 
 def remove_perm(user, permission, obj=None):
-    pass
+    """
+    Remove a permission from a user
+    """
+
+    if not hasattr(permission, "pk"):
+        permission = _get_perm_for_codename(permission)
+
+        if permission is None:
+            return False
+
+    if obj:
+        pass
+    else:
+        user.user_permissions.remove(permission)
+
+    return True
 
 
 def patch_user():
     from django.contrib.auth.models import User
 
     setattr(User, "assign_perm", assign_perm)
+    setattr(User, "remove_perm", remove_perm)
 
 
 def _get_perm_for_codename(permission_codename):
