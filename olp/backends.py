@@ -8,15 +8,20 @@ class PermissionBackend(object):
 
     def get_all_permissions(self, user, obj=None):
         if user.is_anonymous():
-            return set()
+            return ()
 
-        return set()
+        group_permissions = self.get_group_permissions(user, obj)
+
+        permissions = ()
+        permissions += group_permissions
+
+        return permissions
 
     def get_group_permissions(self, user, obj=None):
         if user.is_anonymous():
-            return set()
+            return ()
 
-        return set()
+        return ()
 
     def get_user(self):
         return None
