@@ -23,6 +23,32 @@ def assign_perm(user, permission, obj=None):
     return True
 
 
+def has_perm(base, permission, target=None):
+    """
+    Determines if a base object has a permission
+    """
+
+    from olp.models import ObjectPermission
+
+    if not hasattr(permission, "pk"):
+        permission = _get_perm_for_codename(permission)
+
+        if permission is None:
+            return False
+
+    objs = ObjectPermission.objects.for_base(base)
+
+    if target is not None:
+        objs = objs.for_target(target)
+
+    perms_list = objs.select_related("permission__content_type", "permission")\
+            .values_list("permission__content_type__app_label", "permission__codename")
+
+    permissions = set(["%s.%s" % (perm[0], perm[1]) for perm in perms_list])
+
+    return "%s.%s" % (permission.content_type.app_label, permission.codename) in permissions
+
+
 def remove_perm(user, permission, obj=None):
     """
     Remove a permission from a user
@@ -65,6 +91,9 @@ def patch_models():
 
         setattr(model, "assign_perm", assign_perm)
         setattr(model, "remove_perm", remove_perm)
+
+        if not hasattr(model, "has_perm"):
+            setattr(model, "has_perm", has_perm)
 
 
 def _get_perm_for_codename(permission_codename):

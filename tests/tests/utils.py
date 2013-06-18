@@ -62,6 +62,15 @@ class TestAssignPerm(TestCase):
         self.assertEqual(ObjectPermission.objects.count(), 1)
 
 
+class TestHasPerm(TestCase):
+
+    def setUp(self):
+        from django.contrib.auth.models import User
+
+        self.user = User.objects.create_user("test", "test@test.com", "test")
+        self.user.save()
+
+
 class TestRemovePerm(TestCase):
 
     def setUp(self):
