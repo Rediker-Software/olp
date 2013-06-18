@@ -26,10 +26,30 @@ class PermissionBackend(object):
         return permissions
 
     def get_group_permissions(self, user, obj=None):
+        from django.conf import settings
+
         if user.is_anonymous():
             return set()
 
-        return set()
+        objs = ObjectPermission.objects.none()
+
+        model_dict = settings.OLP_SETTINGS.get("models")
+
+        for model_path, filter_path in model_dict:
+            import_path = ".".join(model_path.split(".")[:-1])
+            model_name = model_path.split(".")[-1]
+
+            model_module = __import__(import_path, {}, {}, str(model_name[-1]))
+            model = getattr(model_module, model_name)
+
+            model_objs = model.objects.filter(**{filter_path: user})
+
+            objs = objs | ObjectPermission.objects.for_base_id(model_objs).for_base_model(model)
+
+        perms_list = objs.select_related("permission__content_type", "permission")\
+            .values_list("permission__content_type__app_label", "permission__codename")
+
+        return set(["%s.%s" % (perm[0], perm[1]) for perm in perms_list])
 
     def get_user(self):
         return None

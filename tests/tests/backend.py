@@ -6,9 +6,15 @@ from ..models import Apple
 class TestBackendBasic(TestCase):
 
     def setUp(self):
-        from django.contrib.auth.models import User
+        from django.contrib.auth.models import Group, User
 
         self.user = User.objects.create_user("test", "test@test.com", "test")
+        self.user.save()
+
+        self.group = Group(name="group")
+        self.group.save()
+
+        self.user.groups.add(self.group)
         self.user.save()
 
         self.backend = PermissionBackend()
@@ -64,6 +70,16 @@ class TestBackendBasic(TestCase):
         apple.save()
 
         self.user.assign_perm("tests.can_be_awesome", apple)
+
+        result = self.backend.has_perm(self.user, "tests.can_be_awesome", apple)
+
+        self.assertEqual(result, True)
+
+    def test_user_has_group_obj_perm(self):
+        apple = Apple(name="test")
+        apple.save()
+
+        self.group.assign_perm("tests.can_be_awesome", apple)
 
         result = self.backend.has_perm(self.user, "tests.can_be_awesome", apple)
 

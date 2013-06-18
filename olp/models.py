@@ -21,6 +21,14 @@ class ObjectPermissionQuerySet(QuerySet):
 
         return self.filter(base_object_ct=ct, base_object_id=obj.id)
 
+    def for_base_model(self, model):
+        ct = ContentType.objects.get_for_model(model)
+
+        return self.filter(base_object_ct=ct)
+
+    def for_base_id(self, id):
+        return self.filter(base_object_id=id)
+
     def for_permission(self, permission):
         return self.filter(permission=permission)
 

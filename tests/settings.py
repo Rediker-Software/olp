@@ -40,6 +40,6 @@ DATABASES = {
 
 OLP_SETTINGS = {
     "models": (
-        ("django.contrib.auth.models.Group", "users"),
+        ("django.contrib.auth.models.Group", "user"),
     )
 }

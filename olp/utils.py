@@ -47,11 +47,24 @@ def remove_perm(user, permission, obj=None):
     return True
 
 
-def patch_user():
+def patch_models():
     from django.contrib.auth.models import User
+    from django.conf import settings
 
     setattr(User, "assign_perm", assign_perm)
     setattr(User, "remove_perm", remove_perm)
+
+    model_dict = settings.OLP_SETTINGS.get("models")
+
+    for model_path, filter_path in model_dict:
+        import_path = ".".join(model_path.split(".")[:-1])
+        model_name = model_path.split(".")[-1]
+
+        model_module = __import__(import_path, {}, {}, str(model_name[-1]))
+        model = getattr(model_module, model_name)
+
+        setattr(model, "assign_perm", assign_perm)
+        setattr(model, "remove_perm", remove_perm)
 
 
 def _get_perm_for_codename(permission_codename):
