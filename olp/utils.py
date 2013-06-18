@@ -3,7 +3,9 @@ def assign_perm(user, permission, obj=None):
     Assign a permission to a user
     """
 
+    from django.contrib.contenttypes.models import ContentType
     from django.contrib.auth.models import Permission
+    from olp.models import ObjectPermission
 
     # Check if the given permission is a Permission object
     # If the permission is given as a string, get the corresponding Permission object
@@ -17,12 +19,13 @@ def assign_perm(user, permission, obj=None):
             if len(permissions) != 1:
                 permission = permissions.get(content_type__app_label=app_label)
             else:
-                permission = permissions.get()
+                permission = permissions[0]
         except Permission.DoesNotExist:
             return False
 
     if obj:
-        pass
+        permission = ObjectPermission(base_object=user, target_object=obj, permission=permission)
+        permission.save()
     else:
         user.user_permissions.add(permission)
 
