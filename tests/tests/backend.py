@@ -26,7 +26,7 @@ class TestBackendBasic(TestCase):
     def test_user_no_permissions(self):
         result = self.backend.get_all_permissions(self.user)
 
-        self.assertEqual(result, ())
+        self.assertEqual(result, set())
 
     def test_user_no_obj_permissions(self):
         apple = Apple(name="test")
@@ -34,12 +34,12 @@ class TestBackendBasic(TestCase):
 
         result = self.backend.get_all_permissions(self.user, apple)
 
-        self.assertEqual(result, ())
+        self.assertEqual(result, set())
 
     def test_user_no_group_permissions(self):
         result = self.backend.get_group_permissions(self.user)
 
-        self.assertEqual(result, ())
+        self.assertEqual(result, set())
 
     def test_user_no_obj_group_permissions(self):
         apple = Apple(name="test")
@@ -47,4 +47,14 @@ class TestBackendBasic(TestCase):
 
         result = self.backend.get_group_permissions(self.user, apple)
 
-        self.assertEqual(result, ())
+        self.assertEqual(result, set())
+
+    def test_user_has_perm(self):
+        apple = Apple(name="test")
+        apple.save()
+
+        self.user.assign_perm("tests.can_be_awesome", apple)
+
+        result = self.backend.has_perm(self.user, "tests.can_be_awesome")
+
+        self.assertEqual(result, True)
