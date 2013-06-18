@@ -12,6 +12,9 @@ class PermissionBackend(object):
 
         objs = ObjectPermission.objects.for_base(user)
 
+        if obj is not None:
+            objs = objs.for_target(obj)
+
         perms_list = objs.select_related("permission__content_type", "permission")\
             .values_list("permission__content_type__app_label", "permission__codename")
 

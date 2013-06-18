@@ -58,3 +58,13 @@ class TestBackendBasic(TestCase):
         result = self.backend.has_perm(self.user, "tests.can_be_awesome")
 
         self.assertEqual(result, True)
+
+    def test_user_has_obj_perm(self):
+        apple = Apple(name="test")
+        apple.save()
+
+        self.user.assign_perm("tests.can_be_awesome", apple)
+
+        result = self.backend.has_perm(self.user, "tests.can_be_awesome", apple)
+
+        self.assertEqual(result, True)
