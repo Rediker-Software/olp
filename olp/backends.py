@@ -4,6 +4,11 @@ from .models import ObjectPermission
 class PermissionBackend(object):
 
     def authenticate(self):
+        """
+        This backend should never authenticate any users.  It only serves as a way to link object-level permissions
+        to users in Django using the authentication backends.
+        """
+
         return None
 
     def get_all_permissions(self, user, obj=None):
@@ -39,7 +44,7 @@ class PermissionBackend(object):
             import_path = ".".join(model_path.split(".")[:-1])
             model_name = model_path.split(".")[-1]
 
-            model_module = __import__(import_path, {}, {}, str(model_name[-1]))
+            model_module = __import__(import_path, {}, {}, str(model_name))
             model = getattr(model_module, model_name)
 
             model_objs = model.objects.filter(**{filter_path: user})
@@ -57,6 +62,10 @@ class PermissionBackend(object):
         return set(["%s.%s" % (perm[0], perm[1]) for perm in perms_list])
 
     def get_user(self):
+        """
+        This backend should never need to authenticate a user.
+        """
+
         return None
 
     def has_perm(self, user, perm, obj=None):
