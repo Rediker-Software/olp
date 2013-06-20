@@ -70,6 +70,13 @@ class TestHasPerm(TestCase):
         self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
 
+    def test_invalid_perm(self):
+        from olp.utils import has_perm
+
+        result = has_perm(self.user, "invalid.perm_name")
+
+        self.assertEqual(result, False)
+
 
 class TestRemovePerm(TestCase):
 

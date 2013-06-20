@@ -1,6 +1,8 @@
 def assign_perm(user, permission, obj=None):
     """
-    Assign a permission to a user
+    Assign a permission to a user, optionally tie it to an object.
+
+    This assigns both the standard Django permissions, and the custom object-level permissions.
     """
 
     from olp.models import ObjectPermission
@@ -25,7 +27,7 @@ def assign_perm(user, permission, obj=None):
 
 def has_perm(base, permission, target=None):
     """
-    Determines if a base object has a permission
+    Determines if a base object has a permission on a target object.
     """
 
     from olp.models import ObjectPermission
@@ -74,6 +76,14 @@ def remove_perm(user, permission, obj=None):
 
 
 def patch_models():
+    """
+    Add three possible methods to Django models in order to make them compatible with the object-level permissions.
+
+    The Django User and Group models will only get the `assign_perm` and `remove_perm` methods, as they already
+    have a `has_perm` method.  Other models which are listed in the `models` key of the settings will get the
+    `assign_perm`, `remove_perm`, and `has_perm` methods.
+    """
+
     from django.contrib.auth.models import User
     from django.conf import settings
 
