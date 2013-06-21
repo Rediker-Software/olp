@@ -108,7 +108,7 @@ class TestRemovePerm(TestCase):
 
         self.user.assign_perm("test.can_be_awesome", apple)
 
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(3):
             result = self.user.remove_perm("test.can_be_awesome", apple)
 
         self.assertEqual(result, True)
@@ -122,7 +122,7 @@ class TestRemovePerm(TestCase):
 
         self.user.assign_perm(permission, apple)
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(2):
             result = self.user.remove_perm(permission, apple)
 
         self.assertEqual(result, True)
