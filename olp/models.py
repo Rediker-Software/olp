@@ -28,6 +28,9 @@ class ObjectPermissionQuerySet(QuerySet):
 
     def for_base_id(self, id):
         return self.filter(base_object_id=id)
+    
+    def for_base_ids(self, ids):
+        return self.filter(base_object_id__in=ids)
 
     def for_permission(self, permission):
         return self.filter(permission=permission)

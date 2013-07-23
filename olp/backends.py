@@ -5,8 +5,9 @@ class PermissionBackend(object):
 
     def authenticate(self):
         """
-        This backend should never authenticate any users.  It only serves as a way to link object-level permissions
-        to users in Django using the authentication backends.
+        This backend should never authenticate any users.  It only serves as a
+        way to link object-level permissions to users in Django using the
+        authentication backends.
         """
 
         return None
@@ -20,12 +21,15 @@ class PermissionBackend(object):
         if obj is not None:
             objs = objs.for_target(obj)
 
-        perms_list = objs.select_related("permission__content_type", "permission")\
-            .values_list("permission__content_type__app_label", "permission__codename")
+        perms_list = objs.select_related("permission__content_type",
+                                         "permission") \
+                    .values_list("permission__content_type__app_label",
+                                 "permission__codename")
 
         group_permissions = self.get_group_permissions(user, obj)
 
-        permissions = set(["%s.%s" % (perm[0], perm[1]) for perm in perms_list])
+        permissions = set(["%s.%s" %
+                          (perm[0], perm[1]) for perm in perms_list])
         permissions.update(group_permissions)
 
         return permissions
@@ -49,15 +53,18 @@ class PermissionBackend(object):
 
             model_objs = model.objects.filter(**{filter_path: user})
 
-            objs_query = ObjectPermission.objects.for_base_id(model_objs).for_base_model(model)
+            objs_query = ObjectPermission.objects.for_base_ids(model_objs) \
+                        .for_base_model(model)
 
             if obj is not None:
                 objs_query = objs_query.for_target(obj)
 
             objs = objs | objs_query
 
-        perms_list = objs.select_related("permission__content_type", "permission")\
-            .values_list("permission__content_type__app_label", "permission__codename")
+        perms_list = objs.select_related("permission__content_type",
+                                         "permission") \
+                    .values_list("permission__content_type__app_label",
+                                 "permission__codename")
 
         return set(["%s.%s" % (perm[0], perm[1]) for perm in perms_list])
 
