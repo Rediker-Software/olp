@@ -112,6 +112,62 @@ def patch_models():
             setattr(model, "has_perm", has_perm)
 
 
+def get_objs_for_user(user, permission):
+    """
+    Gets the objects that a user has a specific permission on.
+    """
+    
+    from django.conf import settings
+    from .models import ObjectPermission
+    
+    if not hasattr(permission, "pk"):
+        permission = _get_perm_for_codename(permission)
+        
+        if permission is None:
+            return set()
+        
+    ct = permission.content_type
+    final_model = ct.model_class()
+    
+    objs = final_model.objects.none()
+    
+    model_dict = settings.OLP_SETTINGS.get("models")
+        
+    for model_path, filter_path in model_dict:
+        model_objs = _get_model_objs_for_user(user, model_path, filter_path)
+        model = model_objs.model
+        
+        perms = ObjectPermission.objects.for_base_ids(model_objs) \
+                .for_base_model(model)
+        
+        obj_ids = perms.values_list("target_object_id", flat=True)
+        
+        path_objs = final_model.objects.filter(id__in=obj_ids)
+        
+        objs = objs | path_objs
+    
+    user_perms = ObjectPermission.objects.for_base(user)
+    user_obj_ids = user_perms.values_list("target_object_id", flat=True)
+    
+    user_objs = final_model.objects.filter(id__in=user_obj_ids)
+    
+    objs = objs | user_objs
+        
+    return objs
+
+
+def _get_model_objs_for_user(user, model_path, filter_path):
+    import_path = ".".join(model_path.split(".")[:-1])
+    model_name = model_path.split(".")[-1]
+    
+    model_module = __import__(import_path, {}, {}, str(model_name))
+    model = getattr(model_module, model_name)
+    
+    model_objs = model.objects.filter(**{filter_path: user})
+    
+    return model_objs
+
+
 def _get_perm_for_codename(permission_codename):
     from django.contrib.auth.models import Permission
 
