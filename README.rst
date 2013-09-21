@@ -45,7 +45,7 @@ OLP determines the settings from the Django settings file using the key
 ``OLP_SETTINGS``.  This must be a dictionary which contains the key ``models``,
 as shown below.
 
-::
+.. code :: python
 
    OLP_SETTINGS = {
        "models": (
@@ -58,7 +58,8 @@ to the model and the queryset filter used to filter by a user.
 Example
 =======
 example/settings.py
-::
+
+.. code :: python
 
    OLP_SETTINGS = {
        "models": (
@@ -67,7 +68,8 @@ example/settings.py
    }
 
 example/models.py
-::
+
+.. code :: python
 
    from django.db import models
 
@@ -80,7 +82,8 @@ example/models.py
            )
 
 python shell
-::
+
+.. code :: python
 
    >>> from olp.utils import patch_models
    >>> patch_models()
