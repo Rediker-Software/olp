@@ -112,7 +112,7 @@ def patch_models():
             setattr(model, "has_perm", has_perm)
 
 
-def get_objs_for_user(user, permission):
+def get_objs_for_user(user, permission, model_class=None):
     """
     Gets the objects that a user has a specific permission on.
     """
@@ -125,10 +125,14 @@ def get_objs_for_user(user, permission):
         
         if permission is None:
             return set()
-        
-    ct = permission.content_type
-    final_model = ct.model_class()
-    
+
+
+    if model_class:
+        final_model = model_class
+    else:
+        ct = permission.content_type
+        final_model = ct.model_class()
+
     objs = final_model.objects.none()
     
     model_dict = settings.OLP_SETTINGS.get("models")
