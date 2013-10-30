@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Permission
 from django.test import TestCase
 from olp.models import ObjectPermission
-from ..models import Apple
+from ..models import Apple, Orange
 
 
 class TestAssignPerm(TestCase):
@@ -181,3 +181,27 @@ class TestRemovePermNotSet(TestCase):
             result = self.user.remove_perm(permission, apple)
 
         self.assertEqual(result, True)
+
+class TestGetObjsForUser(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+
+        self.user = User.objects.create_user("test", "test@test.com", "test")
+        self.user.save()
+
+    def test_get_objs_for_user_fail(self):
+        from olp.utils import get_objs_for_user
+
+        apple = Apple(name="test")
+        apple.save()
+        orange = Orange(name="test")
+        orange.id = apple.id
+        orange.save()
+
+        result = self.user.assign_perm("test.can_be_awesome", apple)
+
+        objs = get_objs_for_user(self.user, "test.can_be_awesome", model_class=Orange)
+        self.assertEqual(len(objs), 0)
+
+
+

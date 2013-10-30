@@ -9,3 +9,9 @@ class Apple(models.Model):
         permissions = (
             ("can_be_awesome", "Can be an awesome to the apple"),
         )
+
+class Orange(models.Model):
+
+    name = models.CharField(max_length=50)
+
+
