@@ -189,7 +189,7 @@ class TestGetObjsForUser(TestCase):
         self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
 
-    def test_get_objs_for_user_fail(self):
+    def test_multiple_models_same_permission(self):
         from olp.utils import get_objs_for_user
 
         apple = Apple(name="test")
@@ -200,7 +200,8 @@ class TestGetObjsForUser(TestCase):
 
         result = self.user.assign_perm("test.can_be_awesome", apple)
 
-        objs = get_objs_for_user(self.user, "test.can_be_awesome", model_class=Orange)
+        objs = get_objs_for_user(self.user, "test.can_be_awesome",
+                                 model_class=Orange)
         self.assertEqual(len(objs), 0)
 
 

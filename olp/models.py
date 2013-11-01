@@ -40,6 +40,11 @@ class ObjectPermissionQuerySet(QuerySet):
 
         return self.filter(target_object_ct=ct, target_object_id=obj.id)
 
+    def for_target_model(self, model):
+        ct = ContentType.objects.get_for_model(model)
+
+        return self.filter(target_object_ct=ct)
+
 
 class ObjectPermission(models.Model):
     base_object_ct = models.ForeignKey(ContentType, related_name="+")

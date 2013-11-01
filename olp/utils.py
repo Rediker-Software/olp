@@ -2,13 +2,15 @@ def assign_perm(user, permission, obj=None):
     """
     Assign a permission to a user, optionally tie it to an object.
 
-    This assigns both the standard Django permissions, and the custom object-level permissions.
+    This assigns both the standard Django permissions, and the custom
+    object-level permissions.
     """
 
     from olp.models import ObjectPermission
 
     # Check if the given permission is a Permission object
-    # If the permission is given as a string, get the corresponding Permission object
+    # If the permission is given as a string, get the corresponding
+    # Permission object
 
     if not hasattr(permission, "pk"):
         permission = _get_perm_for_codename(permission)
@@ -17,7 +19,8 @@ def assign_perm(user, permission, obj=None):
             return False
 
     if obj:
-        permission = ObjectPermission(base_object=user, target_object=obj, permission=permission)
+        permission = ObjectPermission(base_object=user, target_object=obj,
+                                      permission=permission)
         permission.save()
     else:
         user.user_permissions.add(permission)
@@ -43,12 +46,16 @@ def has_perm(base, permission, target=None):
     if target is not None:
         objs = objs.for_target(target)
 
-    perms_list = objs.select_related("permission__content_type", "permission")\
-            .values_list("permission__content_type__app_label", "permission__codename")
+    perms_list = objs.select_related("permission__content_type",
+        "permission").values_list("permission__content_type__app_label",
+                                  "permission__codename")
 
     permissions = set(["%s.%s" % (perm[0], perm[1]) for perm in perms_list])
 
-    return "%s.%s" % (permission.content_type.app_label, permission.codename) in permissions
+    permission_codename = "%s.%s" % (permission.content_type.app_label,
+                                     permission.codename)
+
+    return permission_codename  in permissions
 
 
 def remove_perm(user, permission, obj=None):
@@ -65,7 +72,8 @@ def remove_perm(user, permission, obj=None):
             return False
 
     if obj:
-        permission = ObjectPermission.objects.for_base(user).for_target(obj).for_permission(permission)
+        permission = ObjectPermission.objects.for_base(user).for_target(obj) \
+            .for_permission(permission)
 
         if permission.count():
             permission.delete()
@@ -77,10 +85,12 @@ def remove_perm(user, permission, obj=None):
 
 def patch_models():
     """
-    Add three possible methods to Django models in order to make them compatible with the object-level permissions.
+    Add three possible methods to Django models in order to make them
+    compatible with the object-level permissions.
 
-    The Django User and Group models will only get the `assign_perm` and `remove_perm` methods, as they already
-    have a `has_perm` method.  Other models which are listed in the `models` key of the settings will get the
+    The Django User and Group models will only get the `assign_perm` and
+    `remove_perm` methods, as they already have a `has_perm` method.  Other
+    models which are listed in the `models` key of the settings will get the
     `assign_perm`, `remove_perm`, and `has_perm` methods.
     """
 
@@ -142,7 +152,8 @@ def get_objs_for_user(user, permission, model_class=None):
         model = model_objs.model
         
         perms = ObjectPermission.objects.for_base_ids(model_objs) \
-                .for_base_model(model)
+                .for_base_model(model).for_target_model(final_model) \
+                .for_permission(permission)
         
         obj_ids = perms.values_list("target_object_id", flat=True)
         
@@ -150,7 +161,8 @@ def get_objs_for_user(user, permission, model_class=None):
         
         objs = objs | path_objs
     
-    user_perms = ObjectPermission.objects.for_base(user)
+    user_perms = ObjectPermission.objects.for_base(user) \
+        .for_target_model(final_model).for_permission(permission)
     user_obj_ids = user_perms.values_list("target_object_id", flat=True)
     
     user_objs = final_model.objects.filter(id__in=user_obj_ids)
