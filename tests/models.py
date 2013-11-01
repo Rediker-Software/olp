@@ -8,6 +8,7 @@ class Apple(models.Model):
     class Meta:
         permissions = (
             ("can_be_awesome", "Can be an awesome to the apple"),
+            ("can_eat", "Can eat the apple"),
         )
 
 class Orange(models.Model):
