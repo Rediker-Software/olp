@@ -1,7 +1,8 @@
 from django.contrib.auth.models import Permission
 from django.test import TestCase
 from olp.models import ObjectPermission
-from ..models import Apple
+from olp.utils import get_objs_for_user
+from ..models import Apple, Orange
 
 
 class TestAssignPerm(TestCase):
@@ -181,3 +182,67 @@ class TestRemovePermNotSet(TestCase):
             result = self.user.remove_perm(permission, apple)
 
         self.assertEqual(result, True)
+
+class TestGetObjsForUser(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+
+        self.user = User.objects.create_user("test", "test@test.com", "test")
+        self.user.save()
+
+    def test_single_model_same_permission(self):
+        first = Apple(name="test")
+        first.save()
+
+        second = Apple(name="other")
+        second.save()
+
+        self.user.assign_perm("test.can_be_awesome", first)
+
+        apples = get_objs_for_user(self.user, "tests.can_be_awesome")
+
+        self.assertEqual(apples.count(), 1)
+
+    def test_multiple_models_same_permission(self):
+        apple = Apple(name="test")
+        apple.save()
+
+        orange = Orange(name="test")
+        orange.id = apple.id
+        orange.save()
+
+        result = self.user.assign_perm("test.can_be_awesome", apple)
+
+        oranges = get_objs_for_user(self.user, "test.can_be_awesome",
+                                    model_class=Orange)
+        apples = get_objs_for_user(self.user, "test.can_be_awesome",
+                                   model_class=Apple)
+
+        self.assertEqual(oranges.count(), 0)
+        self.assertEqual(apples.count(), 1)
+
+    def test_single_model_different_permission(self):
+        first = Apple(name="test")
+        first.save()
+
+        second = Apple(name="other")
+        second.save()
+
+        self.user.assign_perm("tests.can_eat", first)
+
+        apples = get_objs_for_user(self.user, "tests.can_be_awesome")
+
+        self.assertEqual(apples.count(), 0)
+
+    def test_multiple_models_different_permission(self):
+        apple = Apple(name="test")
+        apple.save()
+
+        orange = Orange(name="test")
+        orange.save()
+
+        self.user.assign_perm("tests.can_eat", orange)
+
+        apples = get_objs_for_user(self.user, "tests.can_eat")
+
+        self.assertEqual(apples.count(), 0)
