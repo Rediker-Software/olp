@@ -51,7 +51,7 @@ TestRunner = get_runner(settings)
 
 runner = TestRunner(verbosity=1, interactive=args.interactive, failfast=args.failfast)
 
-failures = runner.run_tests(["tests", ])
+failures = runner.run_tests(["tests.tests", ])
 
 if cov:
     cov.stop()

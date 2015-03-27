@@ -128,6 +128,9 @@ def get_objs_for_user(user, permission, model_class=None):
     """
 
     from django.conf import settings
+    from django.contrib.contenttypes.models import ContentType
+    from django.db.models import Q
+
     from .models import ObjectPermission
 
     if not hasattr(permission, "pk"):
@@ -136,38 +139,43 @@ def get_objs_for_user(user, permission, model_class=None):
         if permission is None:
             return set()
 
-
     if model_class:
         final_model = model_class
     else:
         ct = permission.content_type
         final_model = ct.model_class()
 
-    objs = final_model._default_manager.none()
+    user_ct = ContentType.objects.get_for_model(user)
+    final_ct = ContentType.objects.get_for_model(final_model)
 
     model_dict = settings.OLP_SETTINGS.get("models")
+
+    # Filters that only appy to relations where the user is involved
+    related_filter = Q()
 
     for model_path, filter_path in model_dict:
         model_objs = _get_model_objs_for_user(user, model_path, filter_path)
         model = model_objs.model
+        model_ct = ContentType.objects.get_for_model(model)
 
-        perms = ObjectPermission.objects.for_base_ids(model_objs) \
-                .for_base_model(model).for_target_model(final_model) \
-                .for_permission(permission)
+        model_filter = (
+            Q(base_object_ct=model_ct) & Q(base_object_id__in=model_objs)
+        )
 
-        obj_ids = perms.values_list("target_object_id", flat=True)
+        related_filter = related_filter | model_filter
 
-        path_objs = final_model._default_manager.filter(id__in=obj_ids)
+    # Filters that only apply to the user that was passed in
+    user_filter = Q(base_object_ct=user_ct) & Q(base_object_id=user.id)
 
-        objs = objs | path_objs
+    # Filters that apply to all objects in the query
+    all_filter = Q(permission=permission) & Q(target_object_ct=final_ct)
 
-    user_perms = ObjectPermission.objects.for_base(user) \
-        .for_target_model(final_model).for_permission(permission)
-    user_obj_ids = user_perms.values_list("target_object_id", flat=True)
+    perms_filter = (related_filter | user_filter) & all_filter
 
-    user_objs = final_model._default_manager.filter(id__in=user_obj_ids)
+    obj_perms = ObjectPermission.objects.filter(perms_filter)
+    target_ids = obj_perms.values_list("target_object_id", flat=True)
 
-    objs = objs | user_objs
+    objs = final_model._default_manager.filter(id__in=target_ids)
 
     return objs
 
@@ -187,16 +195,29 @@ def _get_model_objs_for_user(user, model_path, filter_path):
 def _get_perm_for_codename(permission_codename):
     from django.contrib.auth.models import Permission
 
+    permission_cache = getattr(Permission, "_olp_cache", {})
+
+    if permission_codename in permission_cache:
+        return permission_cache[permission_codename]
+
     app_label, codename = permission_codename.split(".")
 
-    permissions = Permission.objects.filter(codename=codename)
+    permissions = Permission.objects.filter(
+        codename=codename,
+        content_type__app_label=app_label
+    ).select_related("content_type").only(
+        "content_type__app_label",
+        "content_type__model"
+    )
 
     try:
-        if len(permissions) != 1:
-            permission = permissions.get(content_type__app_label=app_label)
-        else:
-            permission = permissions[0]
-
-        return permission
+        permission = permissions.get()
+    except Permission.MultipleObjectsReturned:
+        permission = permissions[0]
     except Permission.DoesNotExist:
         return None
+
+    permission_cache[permission_codename] = permission
+    Permission._olp_cache = permission_cache
+
+    return permission

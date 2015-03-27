@@ -39,6 +39,8 @@ class PermissionBackend(object):
 
     def get_group_permissions(self, user, obj=None):
         from django.conf import settings
+        from django.contrib.contenttypes.models import ContentType
+        from django.db.models import Q
 
         if user.is_anonymous():
             return set()
@@ -46,6 +48,8 @@ class PermissionBackend(object):
         objs = ObjectPermission.objects.none()
 
         model_dict = settings.OLP_SETTINGS.get("models")
+
+        q_filter = Q()
 
         for model_path, filter_path in model_dict:
             import_path = ".".join(model_path.split(".")[:-1])
@@ -55,14 +59,23 @@ class PermissionBackend(object):
             model = getattr(model_module, model_name)
 
             model_objs = model.objects.filter(**{filter_path: user})
+            model_ct = ContentType.objects.get_for_model(model)
 
-            objs_query = ObjectPermission.objects.for_base_ids(model_objs) \
-                        .for_base_model(model)
+            model_filter = (
+                Q(base_object_id__in=model_objs) & Q(base_object_ct=model_ct)
+            )
 
             if obj is not None:
-                objs_query = objs_query.for_target(obj)
+                target_ct = ContentType.objects.get_for_model(obj)
+                target_filter = (
+                    Q(target_object_ct=target_ct) & Q(target_object_id=obj.id)
+                )
 
-            objs = objs | objs_query
+                model_filter = model_filter & target_filter
+
+            q_filter = q_filter | model_filter
+
+        objs = ObjectPermission.objects.filter(q_filter)
 
         perms_list = objs.select_related("permission__content_type",
                                          "permission") \
