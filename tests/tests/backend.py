@@ -6,7 +6,7 @@ from ..models import Apple
 class TestBackendBasic(TestCase):
 
     def setUp(self):
-        from django.contrib.auth.models import Group, User
+        from django.contrib.auth.models import Group, User, Permission
 
         self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
@@ -18,6 +18,9 @@ class TestBackendBasic(TestCase):
         self.user.save()
 
         self.backend = PermissionBackend()
+
+        if hasattr(Permission, "_olp_cache"):
+            del Permission._olp_cache
 
     def test_no_authenticate(self):
         result = self.backend.authenticate()
