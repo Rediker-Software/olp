@@ -75,12 +75,40 @@ def remove_perm(user, permission, obj=None):
         permission = ObjectPermission.objects.for_base(user).for_target(obj) \
             .for_permission(permission)
 
-        if permission.count():
-            permission.delete()
+        permission.delete()
     else:
         user.user_permissions.remove(permission)
 
     return True
+
+
+def remove_permission_for_object(model_instance):
+    """
+    Removes a permission for a given object.
+    """
+
+    from django.contrib.contenttypes.models import ContentType
+    from olp.models import ObjectPermission
+    from django.db.models import Q
+
+    # Get the content type for the given instance
+    base_content_type = ContentType.objects.get_for_model(
+        model_instance
+    )
+
+    # Unlink any permissions associated with this model
+    permissions = ObjectPermission.objects.filter(
+        (
+            Q(base_object_id=model_instance.id) &
+            Q(base_object_ct=base_content_type)
+        ) |
+        (
+            Q(target_object_id=model_instance.id) &
+            Q(target_object_ct=base_content_type)
+        )
+    )
+
+    permissions.delete()
 
 
 def patch_models():
