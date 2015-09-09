@@ -127,6 +127,7 @@ class TestRemovePerm(TestCase):
         self.assertEqual(result, True)
         self.assertEqual(ObjectPermission.objects.count(), 0)
 
+
 class TestRemovePermNotSet(TestCase):
 
     def setUp(self):
@@ -180,6 +181,50 @@ class TestRemovePermNotSet(TestCase):
             result = self.user.remove_perm(permission, apple)
 
         self.assertEqual(result, True)
+
+
+class TestRemoveAllPermissions(TestCase):
+
+    def setUp(self):
+        from django.contrib.auth.models import User
+
+        self.user = User.objects.create_user("test", "test@test.com", "test")
+        self.user.save()
+
+    def test_remove_permission(self):
+        from olp.utils import remove_all_permissions
+        apple = Apple(name="test")
+        apple.save()
+
+        self.user.assign_perm("tests.can_be_awesome", apple)
+
+        remove_all_permissions(self.user)
+
+        self.assertEqual(ObjectPermission.objects.count(), 0)
+
+    def test_permission_removed_only_from_specified_object(self):
+        from olp.utils import remove_all_permissions
+        from django.contrib.auth.models import User
+
+        self.other_user = User.objects.create_user(
+            "other_test",
+            "other_test@test.com",
+            "other_test"
+        )
+        self.other_user.save()
+
+        apple = Apple(name="test")
+        apple.save()
+
+        self.user.assign_perm("tests.can_be_awesome", apple)
+        self.other_user.assign_perm("tests.can_be_awesome", apple)
+
+        remove_all_permissions(self.user)
+
+        self.assertEqual(ObjectPermission.objects.count(), 1)
+        self.assertFalse(self.user.has_perm("tests.can_be_awesome", apple))
+        self.assertTrue(self.other_user.has_perm("tests.can_be_awesome", apple))
+
 
 class TestGetObjsForUser(TestCase):
     def setUp(self):

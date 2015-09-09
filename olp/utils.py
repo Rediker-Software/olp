@@ -82,9 +82,9 @@ def remove_perm(user, permission, obj=None):
     return True
 
 
-def remove_permission_for_object(model_instance):
+def remove_all_permissions(model_instance):
     """
-    Removes a permission for a given object.
+    Removes all permissions for a given object.
     """
 
     from django.contrib.contenttypes.models import ContentType
