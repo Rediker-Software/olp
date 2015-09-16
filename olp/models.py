@@ -1,8 +1,12 @@
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
 from django.db import models
 from django.db.models.query import QuerySet
+
+try:
+    from django.contrib.contenttypes.fields import GenericForeignKey
+except ImportError:
+    from django.contrib.contenttypes.generic import GenericForeignKey
 
 
 class ObjectPermissionManager(models.Manager):
@@ -28,7 +32,7 @@ class ObjectPermissionQuerySet(QuerySet):
 
     def for_base_id(self, id):
         return self.filter(base_object_id=id)
-    
+
     def for_base_ids(self, ids):
         return self.filter(base_object_id__in=ids)
 
@@ -50,12 +54,12 @@ class ObjectPermission(models.Model):
     base_object_ct = models.ForeignKey(ContentType, related_name="+")
     base_object_id = models.PositiveIntegerField()
 
-    base_object = generic.GenericForeignKey("base_object_ct", "base_object_id")
+    base_object = GenericForeignKey("base_object_ct", "base_object_id")
 
     target_object_ct = models.ForeignKey(ContentType, related_name="+")
     target_object_id = models.PositiveIntegerField()
 
-    target_object = generic.GenericForeignKey("target_object_ct", "target_object_id")
+    target_object = GenericForeignKey("target_object_ct", "target_object_id")
 
     permission = models.ForeignKey(Permission)
 
