@@ -10,6 +10,8 @@ class TestAssignPerm(TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
 
+        super(TestAssignPerm, self).setUp()
+
         self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
 
@@ -68,6 +70,8 @@ class TestHasPerm(TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
 
+        super(TestHasPerm, self).setUp()
+
         self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
 
@@ -83,6 +87,8 @@ class TestRemovePerm(TestCase):
 
     def setUp(self):
         from django.contrib.auth.models import User
+
+        super(TestRemovePerm, self).setUp()
 
         self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
@@ -132,6 +138,8 @@ class TestRemovePermNotSet(TestCase):
 
     def setUp(self):
         from django.contrib.auth.models import User
+
+        super(TestRemovePermNotSet, self).setUp()
 
         self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
@@ -188,6 +196,8 @@ class TestRemoveAllPermissions(TestCase):
     def setUp(self):
         from django.contrib.auth.models import User
 
+        super(TestRemoveAllPermissions, self).setUp()
+
         self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
 
@@ -227,8 +237,11 @@ class TestRemoveAllPermissions(TestCase):
 
 
 class TestGetObjsForUser(TestCase):
+
     def setUp(self):
         from django.contrib.auth.models import User
+
+        super(TestGetObjsForUser, self).setUp()
 
         self.user = User.objects.create_user("test", "test@test.com", "test")
         self.user.save()
