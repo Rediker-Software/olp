@@ -40,10 +40,12 @@ if args.coverage:
 else:
     cov = None
 
+import django
 from django.conf import settings
 from tests import settings as test_settings
 
 settings.configure(test_settings, debug=True)
+django.setup()
 
 from django.test.utils import get_runner
 
