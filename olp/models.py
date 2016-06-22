@@ -12,9 +12,9 @@ except ImportError:
 class ObjectPermissionManager(models.Manager):
 
     def __getattr__(self, name):
-        return getattr(self.get_query_set(), name)
+        return getattr(self.get_queryset(), name)
 
-    def get_query_set(self):
+    def get_queryset(self):
         return ObjectPermissionQuerySet(self.model)
 
 
