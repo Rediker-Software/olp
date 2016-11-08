@@ -150,11 +150,13 @@ def patch_models():
             setattr(model, "has_perm", has_perm)
 
 
-def get_objs_for_user(user, permission, model_class=None):
+def get_obj_ids_for_user(user, permission, model_class=None, final_model=None):
     """
-    Gets the objects that a user has a specific permission on.
-    """
+    Gets the ids of objects that a user has a specific permission on.
 
+    This is used by get_objs_for_user, but can be used separately to avoid
+    returning a query when not desired.
+    """
     from django.conf import settings
     from django.contrib.contenttypes.models import ContentType
     from django.db.models import Q
@@ -167,11 +169,12 @@ def get_objs_for_user(user, permission, model_class=None):
         if permission is None:
             return set()
 
-    if model_class:
-        final_model = model_class
-    else:
-        ct = permission.content_type
-        final_model = ct.model_class()
+    if not final_model:
+        if model_class:
+            final_model = model_class
+        else:
+            ct = permission.content_type
+            final_model = ct.model_class()
 
     user_ct = ContentType.objects.get_for_model(user)
     final_ct = ContentType.objects.get_for_model(final_model)
@@ -202,7 +205,28 @@ def get_objs_for_user(user, permission, model_class=None):
 
     obj_perms = ObjectPermission.objects.filter(perms_filter)
     target_ids = obj_perms.values_list("target_object_id", flat=True)
+    
+    return target_ids
 
+
+def get_objs_for_user(user, permission, model_class=None):
+    """
+    Gets the objects that a user has a specific permission on.
+    """
+    if not hasattr(permission, "pk"):
+        permission = _get_perm_for_codename(permission)
+
+    if permission is None:
+        return set()
+
+    if model_class:
+        final_model = model_class
+    else:
+        ct = permission.content_type
+        final_model = ct.model_class()
+
+    target_ids = get_obj_ids_for_user(user, permission, model_class, final_model)
+    
     objs = final_model._default_manager.filter(id__in=target_ids)
 
     return objs
