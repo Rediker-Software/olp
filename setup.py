@@ -5,8 +5,11 @@ import os
 from olp import __version__
 
 PACKAGE_DIR = os.path.abspath(os.path.dirname(__file__))
+README_PATH = os.path.join(PACKAGE_DIR, 'README.rst')
 os.chdir(PACKAGE_DIR)
 
+with open(README_PATH) as readme:
+     file_description = readme.read()
 
 setup(
     name='olp',
@@ -15,9 +18,10 @@ setup(
     author="Kevin Brown",
     author_email="kbrown@rediker.com",
     description="Object-level permissions across multiple models for Django.",
-    long_description=file(os.path.join(PACKAGE_DIR, 'README.rst')).read(),
+    long_description=file_description,
     license="MIT",
     packages=find_packages(exclude=["tests*", ]),
+    zip_safe=True,
     include_package_data=True,
     install_requires=[
         'Django>=1.3',
@@ -30,7 +34,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
     ]
 )
