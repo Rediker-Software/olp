@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/Rediker-Software/olp.svg?branch=master
+    :target: https://travis-ci.org/Rediker-Software/olp
+
 Object-level permissions (OLP)
 ==============================
 Django has supported object-level permissions since Django 1.2, but it
