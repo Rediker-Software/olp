@@ -59,30 +59,36 @@ class TestBackendBasic(TestCase):
         self.assertEqual(result, set())
 
     def test_user_has_perm(self):
+        from olp.utils import assign_perm
+
         apple = Apple(name="test")
         apple.save()
 
-        self.user.assign_perm("tests.can_be_awesome", apple)
+        assign_perm(self.user, "tests.can_be_awesome", apple)
 
         result = self.backend.has_perm(self.user, "tests.can_be_awesome")
 
         self.assertEqual(result, True)
 
     def test_user_has_obj_perm(self):
+        from olp.utils import assign_perm
+
         apple = Apple(name="test")
         apple.save()
 
-        self.user.assign_perm("tests.can_be_awesome", apple)
+        assign_perm(self.group, "tests.can_be_awesome", apple)
 
         result = self.backend.has_perm(self.user, "tests.can_be_awesome", apple)
 
         self.assertEqual(result, True)
 
     def test_user_has_group_obj_perm(self):
+        from olp.utils import assign_perm
+
         apple = Apple(name="test")
         apple.save()
 
-        self.group.assign_perm("tests.can_be_awesome", apple)
+        assign_perm(self.group, "tests.can_be_awesome", apple)
 
         result = self.backend.has_perm(self.user, "tests.can_be_awesome", apple)
 
