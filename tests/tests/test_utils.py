@@ -58,7 +58,7 @@ class TestAssignPerm(TestCase):
         apple = Apple(name="test")
         apple.save()
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(1):
             result = self.user.assign_perm(permission, apple)
 
         self.assertEqual(result, True)
