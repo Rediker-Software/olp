@@ -1,13 +1,13 @@
-try:
-    from django.conf.urls import include, patterns, url
-except ImportError:
-    from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls import url
+from django.views.generic import View
 
-from olp.utils import patch_user
+class TestView(View):
 
+    def get(self, request):
+        from django.http import HttpResponse
 
-patch_user()
+        return HttpResponse('ok')
 
-urlpatterns = patterns('',
-    
-)
+urlpatterns = [
+    url('^test$', TestView.as_view()),
+]
