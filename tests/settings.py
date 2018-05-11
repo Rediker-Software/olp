@@ -43,3 +43,5 @@ OLP_SETTINGS = {
         ("django.contrib.auth.models.Group", "user"),
     )
 }
+
+SECRET_KEY = "notsosecretkey"
