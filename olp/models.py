@@ -1,21 +1,8 @@
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models.query import QuerySet
-
-try:
-    from django.contrib.contenttypes.fields import GenericForeignKey
-except ImportError:
-    from django.contrib.contenttypes.generic import GenericForeignKey
-
-
-class ObjectPermissionManager(models.Manager):
-
-    def __getattr__(self, name):
-        return getattr(self.get_queryset(), name)
-
-    def get_queryset(self):
-        return ObjectPermissionQuerySet(self.model)
 
 
 class ObjectPermissionQuerySet(QuerySet):
@@ -63,4 +50,4 @@ class ObjectPermission(models.Model):
 
     permission = models.ForeignKey(Permission)
 
-    objects = ObjectPermissionManager()
+    objects = ObjectPermissionQuerySet.as_manager()
