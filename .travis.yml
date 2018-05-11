@@ -13,8 +13,8 @@ env:
 
 install:
   - 'pip install -q Django==$DJANGO_VERSION'
-  - 'pip install argparse pep8'
+  - 'pip install pytest pytest-django'
   - 'pip install .'
 
 script:
-  - 'python runtests.py --no-coverage'
+  - 'python -m pytest -vvv tests'
