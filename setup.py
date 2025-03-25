@@ -66,7 +66,7 @@ setup(
     zip_safe=True,
     include_package_data=True,
     install_requires=[
-        'Django==4.2.19',
+        'Django==4.2.20',
     ],
     # See http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
