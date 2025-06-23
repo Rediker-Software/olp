@@ -16,7 +16,7 @@ class PermissionBackend(object):
         return None
 
     def get_all_permissions(self, user, obj=None):
-        if user.is_anonymous():
+        if user.is_anonymous:
             return set()
 
         objs = ObjectPermission.objects.for_base(user)
@@ -42,7 +42,7 @@ class PermissionBackend(object):
         from django.contrib.contenttypes.models import ContentType
         from django.db.models import Q
 
-        if user.is_anonymous():
+        if user.is_anonymous:
             return set()
 
         objs = ObjectPermission.objects.none()
