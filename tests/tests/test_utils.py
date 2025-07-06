@@ -147,7 +147,7 @@ class TestRemovePermNotSet(TestCase):
     def test_real_normal_permission(self):
         result = self.user.remove_perm("tests.can_be_awesome")
 
-        self.assertEquals(result, True)
+        self.assertEqual(result, True)
 
     def test_fake_normal_permission(self):
         result = self.user.remove_perm("test.does_not_exist")

@@ -1,13 +1,15 @@
 # Import all of the settings from the global settings file.
 # This allows us to have our own custom settings for running tests.
 
-from django.conf.global_settings import *
+# from django.conf.global_settings import *
+from django.conf import settings
 import os
 
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 DEBUG = True
 TEMPLATE_DEBUG = True
+USE_TZ = False
 
 ROOT_URLCONF = "tests.urls"
 
@@ -16,7 +18,7 @@ AUTHENTICATION_BACKENDS = (
     "olp.backends.PermissionBackend",
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

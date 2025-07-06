@@ -5,11 +5,12 @@ class TestMiddleware(TestCase):
 
     def test_auto_patches(self):
         from django.contrib.auth.models import User
-        from django.utils.encoding import force_text
+        # from django.utils.encoding import force_text
+        from django.utils.encoding import force_str
         from olp.utils import assign_perm
 
         response = self.client.get('/test')
 
-        self.assertEqual(force_text(response.content), 'ok')
+        self.assertEqual(force_str(response.content), 'ok')
 
         self.assertIs(getattr(User.assign_perm, "__func__", User.assign_perm), assign_perm)

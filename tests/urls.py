@@ -1,4 +1,5 @@
-from django.conf.urls import url
+# from django.conf.urls import url
+from django.urls import re_path
 from django.views.generic import View
 
 class TestView(View):
@@ -9,5 +10,5 @@ class TestView(View):
         return HttpResponse('ok')
 
 urlpatterns = [
-    url('^test$', TestView.as_view()),
+    re_path('^test$', TestView.as_view()),
 ]
